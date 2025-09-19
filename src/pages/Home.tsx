@@ -22,7 +22,7 @@ const Home = () => {
               <div className="byways-tile bg-moss-gradient text-white h-60">
                 <div className="flex flex-col h-full justify-between">
                   <div>
-                    <h3 className="text-2xl font-bold mb-2">Where My Mood Goes?</h3>
+                    <h3 className="text-2xl font-bold mb-2">What My Mood Goes?</h3>
                     <p className="text-white/90">
                       Discover places based on your current mood, budget, and group size
                     </p>
