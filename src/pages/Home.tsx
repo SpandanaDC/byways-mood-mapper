@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -19,10 +18,10 @@ const Home = () => {
           {/* Main Tiles */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link to="/mood-discovery" className="group">
-              <div className="byways-tile bg-moss-gradient text-white h-60">
+              <div className="byways-tile bg-vibrant-gradient text-white h-60">
                 <div className="flex flex-col h-full justify-between">
                   <div>
-                    <h3 className="text-2xl font-bold mb-2">Where My Mood Goes?222?</h3>
+                    <h3 className="text-2xl font-bold mb-2">Where My Mood Goes?</h3>
                     <p className="text-white/90">
                       Discover places based on your current mood, budget, and group size
                     </p>
@@ -35,7 +34,7 @@ const Home = () => {
             </Link>
             
             <Link to="/plan-day" className="group">
-              <div className="byways-tile bg-moss-light-gradient h-60">
+              <div className="byways-tile bg-light-gradient h-60">
                 <div className="flex flex-col h-full justify-between">
                   <div>
                     <h3 className="text-2xl font-bold text-byways-dark mb-2">Plan A Day</h3>
@@ -61,16 +60,20 @@ const Home = () => {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {["Cubbon Park", "Lalbagh Botanical Garden", "Church Street"].map((place, index) => (
+              {[
+                { name: "Cubbon Park", image: "https://images.pexels.com/photos/1039518/pexels-photo-1039518.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+                { name: "Lalbagh Botanical Garden", image: "https://images.pexels.com/photos/10182293/pexels-photo-10182293.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" },
+                { name: "Church Street", image: "https://images.pexels.com/photos/1684151/pexels-photo-1684151.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" }
+              ].map((place, index) => (
                 <div key={index} className="byways-card">
                   <div 
                     className="h-48 bg-cover bg-center" 
                     style={{
-                      backgroundImage: `url(https://source.unsplash.com/random/400x300/?bangalore,${place.toLowerCase().replace(/\s/g, '')})`
+                      backgroundImage: `url(${place.image})`
                     }}
                   ></div>
                   <div className="p-4">
-                    <h3 className="font-semibold text-byways-dark">{place}</h3>
+                    <h3 className="font-semibold text-byways-dark">{place.name}</h3>
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-sm text-byways-accent">₹0 - ₹200 • Outdoor</span>
                       <Link to={`/place/${index}`} className="text-byways-primary text-sm hover:underline">
