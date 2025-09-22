@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -63,12 +62,12 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// ByWays moss green theme colors
+				// ByWays new vibrant theme colors
 				byways: {
-					dark: '#222217',
-					primary: '#4D5038',
-					accent: '#858666',
-					light: '#D2CBC1',
+					dark: '#1E293B', // Slate 800
+					primary: '#0D9488', // Teal 600
+					accent: '#F97316', // Orange 500
+					light: '#FEF3C7', // Amber 100
 				}
 			},
 			borderRadius: {
@@ -109,8 +108,8 @@ export default {
 				'slide-in': 'slide-in 0.5s ease-out'
 			},
 			backgroundImage: {
-				'moss-gradient': 'linear-gradient(135deg, #4D5038 0%, #858666 100%)',
-				'moss-light-gradient': 'linear-gradient(135deg, #858666 0%, #D2CBC1 100%)'
+				'vibrant-gradient': 'linear-gradient(135deg, #0D9488 0%, #F97316 100%)',
+				'light-gradient': 'linear-gradient(135deg, #FEF3C7 0%, #FDBA74 100%)'
 			}
 		}
 	},
