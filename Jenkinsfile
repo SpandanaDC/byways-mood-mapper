@@ -6,11 +6,10 @@ pipeline {
         IMAGE_NAME         = 'byways-app'
         DOCKERHUB_CREDENTIALS_ID = 'docker-hub-login'
         
-        // --- UPDATED CONFIGURATION ---
-        // Your logs confirmed the app is running on Port 8080 inside
+        // Pulls the secret text 'mongo-uri' from Jenkins Credentials
+        MONGO_CONNECTION_STRING = credentials('mongo-uri')
+
         CONTAINER_PORT     = '8080' 
-        
-        // We set this to 5000 to match your AWS Security Group settings!
         HOST_PORT          = '5000'
     }
 
@@ -18,6 +17,19 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+
+        // --- NEW STAGE: Stop the App BEFORE building to save RAM ---
+        stage('Free up RAM') {
+            steps {
+                script {
+                    echo '--- Stopping current app to free up memory ---'
+                    sh "docker stop byways-container || true"
+                    sh "docker rm byways-container || true"
+                    // Clear unused Docker data to free up space
+                    sh "docker system prune -f" 
+                }
             }
         }
 
@@ -54,15 +66,12 @@ pipeline {
             steps {
                 script {
                     echo '--- Deploying Application ---'
-                    sh "docker stop byways-container || true"
-                    sh "docker rm byways-container || true"
                     
-                    // Map EC2 Port 5000 -> Container Port 8080
-                    // Remember to fill in your MONGO_URI if your app needs it!
+                    // We now inject the secret variable ($MONGO_CONNECTION_STRING) directly
                     sh """
                         docker run -d \
                         -p ${HOST_PORT}:${CONTAINER_PORT} \
-                        -e MONGO_URI='mongodb+srv://YOUR_USER:YOUR_PASSWORD@cluster.mongodb.net/byways' \
+                        -e MONGO_URI="$MONGO_CONNECTION_STRING" \
                         --name byways-container \
                         docker.io/${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest
                     """
