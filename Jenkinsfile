@@ -5,9 +5,12 @@ pipeline {
         DOCKERHUB_USERNAME = 'spandanadc'
         IMAGE_NAME         = 'byways-app'
         DOCKERHUB_CREDENTIALS_ID = 'docker-hub-login'
-        // Your logs show your app uses Port 5000 internally
-        CONTAINER_PORT     = '5000' 
-        // We will expose it on Port 3000 so you don't have to change EC2 settings
+        
+        // --- UPDATED CONFIGURATION ---
+        // Your logs confirmed the app is running on Port 8080 inside
+        CONTAINER_PORT     = '8080' 
+        
+        // We keep this as 3000 because Jenkins is already using port 8080 on the server!
         HOST_PORT          = '3000'
     }
 
@@ -22,7 +25,6 @@ pipeline {
             steps {
                 script {
                     echo '--- Building Docker Image ---'
-                    // Added 'docker.io/' to fix the "server misbehaving" error
                     sh "docker build -t docker.io/${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest ."
                 }
             }
@@ -43,7 +45,6 @@ pipeline {
             steps {
                 script {
                     echo '--- Pushing to Docker Hub ---'
-                    // Added 'docker.io/' here too
                     sh "docker push docker.io/${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
                 }
             }
@@ -53,12 +54,18 @@ pipeline {
             steps {
                 script {
                     echo '--- Deploying Application ---'
-                    // Stop old container
                     sh "docker stop byways-container || true"
                     sh "docker rm byways-container || true"
                     
-                    // Map EC2 Port 3000 -> Container Port 5000
-                    sh "docker run -d -p ${HOST_PORT}:${CONTAINER_PORT} --name byways-container docker.io/${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
+                    // Map EC2 Port 3000 -> Container Port 8080
+                    // Remember to fill in your MONGO_URI if your app needs it!
+                    sh """
+                        docker run -d \
+                        -p ${HOST_PORT}:${CONTAINER_PORT} \
+                        -e MONGO_URI='mongodb+srv://YOUR_USER:YOUR_PASSWORD@cluster.mongodb.net/byways' \
+                        --name byways-container \
+                        docker.io/${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest
+                    """
                 }
             }
         }
@@ -70,4 +77,4 @@ pipeline {
         }
     }
 }
-// End of Pipeline - Make sure this closing bracket is present!
+// End of Pipeline
