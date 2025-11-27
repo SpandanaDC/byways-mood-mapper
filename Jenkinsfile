@@ -2,11 +2,13 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USERNAME = 'SpandanaDC'
+        DOCKERHUB_USERNAME = 'spandanadc'
         IMAGE_NAME         = 'byways-app'
         DOCKERHUB_CREDENTIALS_ID = 'docker-hub-login'
-        // The port your app runs on (internal and external)
-        APP_PORT           = '3000' 
+        // Your logs show your app uses Port 5000 internally
+        CONTAINER_PORT     = '5000' 
+        // We will expose it on Port 3000 so you don't have to change EC2 settings
+        HOST_PORT          = '3000'
     }
 
     stages {
@@ -19,7 +21,9 @@ pipeline {
         stage('Build Image') {
             steps {
                 script {
-                    sh "docker build -t ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest ."
+                    echo '--- Building Docker Image ---'
+                    // Added 'docker.io/' to fix the "server misbehaving" error
+                    sh "docker build -t docker.io/${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest ."
                 }
             }
         }
@@ -27,6 +31,7 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 script {
+                    echo '--- Logging into Docker Hub ---'
                     withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
                     }
@@ -37,7 +42,9 @@ pipeline {
         stage('Push Image') {
             steps {
                 script {
-                    sh "docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
+                    echo '--- Pushing to Docker Hub ---'
+                    // Added 'docker.io/' here too
+                    sh "docker push docker.io/${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
                 }
             }
         }
@@ -46,15 +53,12 @@ pipeline {
             steps {
                 script {
                     echo '--- Deploying Application ---'
-                    // 1. Stop and remove the old container (ignore errors if it doesn't exist yet)
+                    // Stop old container
                     sh "docker stop byways-container || true"
                     sh "docker rm byways-container || true"
                     
-                    // 2. Run the new container
-                    // -d = Detached mode (runs in background)
-                    // -p = Map port 3000 on server to 3000 in container
-                    // --name = Name it so we can stop it easily next time
-                    sh "docker run -d -p ${APP_PORT}:${APP_PORT} --name byways-container ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
+                    // Map EC2 Port 3000 -> Container Port 5000
+                    sh "docker run -d -p ${HOST_PORT}:${CONTAINER_PORT} --name byways-container docker.io/${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
                 }
             }
         }
@@ -62,8 +66,6 @@ pipeline {
 
     post {
         always {
-            // Clean up the image to save space, but DO NOT stop the running container!
             sh "docker logout"
         }
     }
-}
