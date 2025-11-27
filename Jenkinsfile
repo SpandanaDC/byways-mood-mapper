@@ -69,3 +69,5 @@ pipeline {
             sh "docker logout"
         }
     }
+}
+// End of Pipeline - Make sure this closing bracket is present!
