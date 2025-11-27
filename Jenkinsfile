@@ -2,19 +2,16 @@ pipeline {
     agent any
 
     environment {
-        // --- CONFIGURATION ---
-        // Your Docker Hub username
         DOCKERHUB_USERNAME = 'SpandanaDC'
-        // Name you want for your image
         IMAGE_NAME         = 'byways-app'
-        // The ID you created in Jenkins Credentials
         DOCKERHUB_CREDENTIALS_ID = 'docker-hub-login'
+        // The port your app runs on (internal and external)
+        APP_PORT           = '3000' 
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Get the latest code from the GitHub branch
                 checkout scm
             }
         }
@@ -22,8 +19,6 @@ pipeline {
         stage('Build Image') {
             steps {
                 script {
-                    echo '--- Building Docker Image ---'
-                    // This uses the "Dockerfile" in your repo
                     sh "docker build -t ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest ."
                 }
             }
@@ -32,7 +27,6 @@ pipeline {
         stage('Login to Docker Hub') {
             steps {
                 script {
-                    echo '--- Logging in ---'
                     withCredentials([usernamePassword(credentialsId: DOCKERHUB_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
                     }
@@ -43,20 +37,33 @@ pipeline {
         stage('Push Image') {
             steps {
                 script {
-                    echo '--- Pushing to Docker Hub ---'
                     sh "docker push ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
                 }
             }
         }
-        
-        // OPTIONAL: Add a "Deploy" stage here later to run the app!
+
+        stage('Deploy to EC2') {
+            steps {
+                script {
+                    echo '--- Deploying Application ---'
+                    // 1. Stop and remove the old container (ignore errors if it doesn't exist yet)
+                    sh "docker stop byways-container || true"
+                    sh "docker rm byways-container || true"
+                    
+                    // 2. Run the new container
+                    // -d = Detached mode (runs in background)
+                    // -p = Map port 3000 on server to 3000 in container
+                    // --name = Name it so we can stop it easily next time
+                    sh "docker run -d -p ${APP_PORT}:${APP_PORT} --name byways-container ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest"
+                }
+            }
+        }
     }
 
     post {
         always {
-            // cleanup to save space on EC2
-            sh "docker rmi ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:latest || true"
+            // Clean up the image to save space, but DO NOT stop the running container!
             sh "docker logout"
         }
     }
-}        
+}
