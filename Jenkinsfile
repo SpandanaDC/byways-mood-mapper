@@ -10,8 +10,8 @@ pipeline {
         // Your logs confirmed the app is running on Port 8080 inside
         CONTAINER_PORT     = '8080' 
         
-        // We keep this as 3000 because Jenkins is already using port 8080 on the server!
-        HOST_PORT          = '3000'
+        // We set this to 5000 to match your AWS Security Group settings!
+        HOST_PORT          = '5000'
     }
 
     stages {
@@ -57,7 +57,7 @@ pipeline {
                     sh "docker stop byways-container || true"
                     sh "docker rm byways-container || true"
                     
-                    // Map EC2 Port 3000 -> Container Port 8080
+                    // Map EC2 Port 5000 -> Container Port 8080
                     // Remember to fill in your MONGO_URI if your app needs it!
                     sh """
                         docker run -d \
