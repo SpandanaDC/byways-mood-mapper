@@ -56,13 +56,21 @@ const MoodDiscovery = () => {
 
   // Fetch places from backend on load
   useEffect(() => {
-    fetch('http://localhost:5000/api/places')
+    // UPDATED: Using relative path '/api/places' which works in Prod and Dev
+    fetch('/api/places')
       .then(res => res.json())
       .then(data => {
-        console.log("Fetched places:", data); // Debugging log
+        console.log("Fetched places:", data); 
         setPlaces(data);
       })
-      .catch(err => console.error("Error fetching places:", err));
+      .catch(err => {
+        console.error("Error fetching places:", err);
+        toast({
+            title: "Connection Error",
+            description: "Could not connect to the database.",
+            variant: "destructive"
+        });
+      });
   }, []);
 
   // Toggle Mood Selection
@@ -120,7 +128,6 @@ const MoodDiscovery = () => {
       const budgetMatch = (placeMin <= userMaxBudget) && (userMinBudget <= placeMax);
 
       // 2. Mood Filter (OR logic: match ANY selected mood)
-      // Changing to ANY match instead of ALL to increase result chances
       const moodMatch = selectedMoods.some(mood => 
         place.tags.map(t => t.toLowerCase()).includes(mood.toLowerCase())
       );

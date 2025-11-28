@@ -27,9 +27,8 @@ const PlaceDetails = () => {
     const fetchPlace = async () => {
         if (!id) return;
         try {
-            // We need to fetch all places and find the one with matching ID
-            // because our simple API returns all places at /api/places
-            const response = await fetch(`http://localhost:5000/api/places`);
+            // UPDATED: Using relative path '/api/places'
+            const response = await fetch(`/api/places`);
             if (response.ok) {
                 const allPlaces = await response.json();
                 const foundPlace = allPlaces.find((p: any) => p.id === parseInt(id));
