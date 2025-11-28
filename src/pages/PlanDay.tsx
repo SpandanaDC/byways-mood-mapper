@@ -85,7 +85,7 @@ const mockItineraries = [
   ]},
   // 10. Foodie Tour - Standard
   { type: "foodie", budget: "500-1500", plan: [
-    { time: "10:00 AM", activity: "Breakfast at Vidyarthi Bhavan", description: "Start with a legendary Masala Dosa and coffee at this iconic Basavanagudi joint.", image: "https://placehold.co/600x400/fca311/8c5000?text=Vidyarthi+Bhavan" },
+    { time: "10:00 AM", activity: "Breakfast", description: "Start with a legendary Masala Dosa and coffee at this iconic Basavanagudi joint.", image: "https://placehold.co/600x400/fca311/8c5000?text=Vidyarthi+Bhavan" },
     { time: "1:00 PM", activity: "Traditional Lunch at MTR", description: "Experience an authentic, multi-course Karnataka meal at Mavalli Tiffin Rooms.", image: "https://placehold.co/600x400/e0e1dd/495057?text=MTR+Thali" },
     { time: "5:00 PM", activity: "Snacks at VV Puram Food Street", description: "Explore the bustling 'Thindi Beedhi' for endless varieties of chaats, sweets, and snacks.", image: "https://placehold.co/600x400/ffbf69/c66c00?text=VV+Puram" },
     { time: "8:00 PM", activity: "Dinner at Church Street Social", description: "Chill with unique cocktails and modern bar food in a lively atmosphere.", image: "https://placehold.co/600x400/5a189a/e0b1cb?text=Social" }
