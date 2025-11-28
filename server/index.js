@@ -1,18 +1,28 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
+require('dotenv').config(); // Loads .env file if running locally
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
+// --- DATABASE CONNECTION ---
+// This is the critical part for your deployment.
+// It looks for the environment variable 'MONGO_URI' injected by Docker/Jenkins.
 const MONGO_URI = process.env.MONGO_URI;
 
+if (!MONGO_URI) {
+  console.error("❌ FATAL ERROR: MONGO_URI is not defined in environment variables.");
+  console.error("   - If running locally, check your .env file.");
+  console.error("   - If running in Jenkins/Docker, check the -e flag in your Jenkinsfile.");
+  process.exit(1); // Stop the app so Docker restarts it or logs the crash
+}
+
 mongoose.connect(MONGO_URI)
-  .then(() => console.log("✅ Connected to MongoDB"))
+  .then(() => console.log("✅ Connected to MongoDB Successfully"))
   .catch(err => console.error("❌ MongoDB connection error:", err));
+
 
 // --- SCHEMAS ---
 
@@ -46,11 +56,11 @@ const itinerarySchema = new mongoose.Schema({
 
 const Itinerary = mongoose.model('Itinerary', itinerarySchema, 'itineraries');
 
-// 3. User Schema (New)
+// 3. User Schema
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true }, // Email acts as User ID
-  password: { type: String, required: true }, // Store hashed password ideally
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
   age: Number,
   locality: String,
   createdAt: { type: Date, default: Date.now }
@@ -105,8 +115,8 @@ app.post('/api/register', async (req, res) => {
 
     const newUser = new User({
       name,
-      email, // 'email' will be used as userId
-      password, // In production, hash this password!
+      email,
+      password, // In a real app, please hash this!
       age,
       locality
     });
@@ -128,7 +138,6 @@ app.post('/api/login', async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // In production, compare hashed passwords
     if (user.password !== password) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
