@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { useToast } from "@/hooks/use-toast";
 
 // --- MOCK USER FALLBACK ---
-const mockUser = {
+const defaultMockUser = {
   email: "user@example.com",
   password: "password123",
   name: "Namma Traveller"
@@ -19,11 +19,31 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // --- NEW: Mock Social Login Handler ---
+  const handleSocialLogin = (provider: string) => {
+    // Create a mock user for social login
+    const socialUser = {
+        email: `${provider.toLowerCase()}@user.com`,
+        password: "social-login",
+        name: `${provider} User`
+    };
+    // Save to localStorage so app thinks they are logged in
+    localStorage.setItem('tempMockUser', JSON.stringify(socialUser));
+
+    toast({
+        title: `Logged in with ${provider}`,
+        description: "Redirecting to home...",
+    });
+
+    setTimeout(() => {
+        navigate("/home");
+    }, 800);
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      // UPDATED: Use relative path /api/login
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -42,17 +62,28 @@ const Login = () => {
       console.warn("Login error, trying mock login:", error);
       
       // FALLBACK LOGIC
-      if (email === mockUser.email && password === mockUser.password) {
-         toast({
-            title: "Offline Mode",
-            description: "Logged in with offline credentials.",
-            variant: "default"
-         });
+      // 1. Check hardcoded mock user
+      let isValid = (email === defaultMockUser.email && password === defaultMockUser.password);
+      
+      // 2. Check localStorage mock user (if registered in this session)
+      if (!isValid) {
+          const storedUser = localStorage.getItem('tempMockUser');
+          if (storedUser) {
+              const parsedUser = JSON.parse(storedUser);
+              if (email === parsedUser.email && password === parsedUser.password) {
+                  isValid = true;
+              }
+          }
+      }
+
+      if (isValid) {
+         // Removed the explicit "Offline Mode" toast here as requested
+         // Just navigate directly on successful mock login
          navigate("/home");
       } else {
         toast({
             title: "Login Failed",
-            description: "Invalid email or password (checked online & offline).",
+            description: "Invalid email or password.",
             variant: "destructive"
         });
       }
@@ -113,13 +144,21 @@ const Login = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="h-12 rounded-xl hover:bg-slate-50">
+            <Button 
+              variant="outline" 
+              className="h-12 rounded-xl hover:bg-slate-50"
+              onClick={() => handleSocialLogin("Google")}
+            >
               {/* Google Icon Placeholder */}
-              <span className="mr-2">G</span> Google
+              <span className="mr-2 font-bold text-blue-500">G</span> Google
             </Button>
-            <Button variant="outline" className="h-12 rounded-xl hover:bg-slate-50">
+            <Button 
+              variant="outline" 
+              className="h-12 rounded-xl hover:bg-slate-50"
+              onClick={() => handleSocialLogin("Facebook")}
+            >
               {/* Facebook Icon Placeholder */}
-              <span className="mr-2">f</span> Facebook
+              <span className="mr-2 font-bold text-blue-700">f</span> Facebook
             </Button>
           </div>
         </CardContent>

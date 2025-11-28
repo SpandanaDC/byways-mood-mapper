@@ -23,12 +23,31 @@ const Register = () => {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [locality, setLocality] = useState("Bengaluru");
-  const [email, setEmail] = useState(""); // Added Email State
+  const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { toast } = useToast();
-  const navigate = useNavigate(); // To redirect after registration
+  const navigate = useNavigate(); 
   
+  // --- NEW: Mock Social Signup Handler ---
+  const handleSocialSignup = (provider: string) => {
+      const socialUser = {
+          email: `${provider.toLowerCase()}@user.com`,
+          password: "social-login",
+          name: `${provider} User`
+      };
+      localStorage.setItem('tempMockUser', JSON.stringify(socialUser));
+
+      toast({
+          title: `Signed up with ${provider}`,
+          description: "Redirecting to home...",
+      });
+
+      setTimeout(() => {
+          navigate("/home");
+      }, 800);
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -42,7 +61,6 @@ const Register = () => {
     }
 
     try {
-      // UPDATED: Using relative path '/api/register'
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: {
@@ -52,7 +70,7 @@ const Register = () => {
           name,
           email,
           password,
-          age: parseInt(age), // Ensure age is sent as a number
+          age: parseInt(age), 
           locality
         }),
       });
@@ -64,19 +82,23 @@ const Register = () => {
           title: "Registration Successful",
           description: "Welcome to ByWays! Please sign in.",
         });
-        navigate("/login"); // Redirect to login page
+        navigate("/login"); 
       } else {
         throw new Error(data.message || "Registration failed");
       }
     } catch (error) {
       console.warn("Registration error, using mock registration:", error);
-      // FALLBACK LOGIC for registration
+      
+      // Save the user to localStorage so Login.tsx can find them!
+      const newMockUser = { email, password, name };
+      localStorage.setItem('tempMockUser', JSON.stringify(newMockUser));
+
       toast({
           title: "Offline Mode",
-          description: "Registration simulated (Database unreachable). Redirecting to login.",
+          description: "Registration simulated (Database unreachable). You can now log in with these credentials.",
           variant: "default"
       });
-      // Simulate successful registration delay
+      
       setTimeout(() => {
           navigate("/login");
       }, 1500);
@@ -116,7 +138,6 @@ const Register = () => {
                 />
               </div>
 
-              {/* Added Email Field */}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input 
@@ -204,13 +225,25 @@ const Register = () => {
             </div>
             
             <div className="grid grid-cols-3 gap-3">
-              <Button variant="outline" className="border-byways-accent/20">
+              <Button 
+                variant="outline" 
+                className="border-byways-accent/20"
+                onClick={() => handleSocialSignup("Google")}
+              >
                 Google
               </Button>
-              <Button variant="outline" className="border-byways-accent/20">
+              <Button 
+                variant="outline" 
+                className="border-byways-accent/20"
+                onClick={() => handleSocialSignup("Facebook")}
+              >
                 Facebook
               </Button>
-              <Button variant="outline" className="border-byways-accent/20">
+              <Button 
+                variant="outline" 
+                className="border-byways-accent/20"
+                onClick={() => handleSocialSignup("Instagram")}
+              >
                 Instagram
               </Button>
             </div>
