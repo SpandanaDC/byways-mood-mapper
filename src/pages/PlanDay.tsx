@@ -92,7 +92,7 @@ const mockItineraries = [
   ]},
   // 11. Cultural/Historical - Standard
   { type: "cultural", budget: "500-1500", plan: [
-    { time: "10:00 AM", activity: "Tipu Sultan's Summer Palace", description: "Step back in time at this beautiful Indo-Islamic palace.", image: "https://placehold.co/600x400/d68c45/432818?text=Tipu+Sultan+Palace" },
+    { time: "10:00 AM", activity: "Tipu Sultan", description: "Step back in time at this beautiful Indo-Islamic palace.", image: "https://placehold.co/600x400/d68c45/432818?text=Tipu+Sultan+Palace" },
     { time: "12:00 PM", activity: "Explore Bangalore Fort", description: "Visit the nearby fort ruins and understand the origins of the city.", image: "https://placehold.co/600x400/c19a6b/5a402a?text=Bangalore+Fort" },
     { time: "2:00 PM", activity: "Lunch at a local eatery", description: "Have a simple, authentic meal in the old city area.", image: "https://placehold.co/600x400/fcefb4/a5a58d?text=Local+Meal" },
     { time: "4:00 PM", activity: "Visvesvaraya Museum", description: "Engage with interactive science exhibits and learn about technological history.", image: "https://placehold.co/600x400/b7b7a4/5b5b5b?text=Museum" }
