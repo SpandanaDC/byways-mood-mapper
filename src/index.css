@@ -3,58 +3,63 @@
 @tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap'); /* Ensure brand font is loaded */
+
 
 @layer base {
   :root {
-    --background: 240 10% 98%;
+    --background: 0 0% 100%;
     --foreground: 222 47% 11%;
 
-    --card: 240 10% 98%;
+    --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
 
-    --popover: 240 10% 98%;
+    --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 173 80% 32%; /* Teal 600 */
-    --primary-foreground: 240 10% 98%;
+    /* Teal 600 - Modern, calm primary */
+    --primary: 173 80% 32%; 
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 215 28% 17%;
-    --secondary-foreground: 240 10% 98%;
+    /* Slate 100 - Soft secondary */
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 220 14% 90%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 24 95% 53%; /* Orange 500 */
-    --accent-foreground: 240 10% 98%;
+    /* Orange 500 - Energetic accent */
+    --accent: 24 95% 53%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 240 10% 98%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 220 13% 89%;
-    --input: 220 13% 89%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
     --ring: 173 80% 32%;
 
-    --radius: 0.75rem;
+    --radius: 1rem; /* Rounded corners for everything */
   }
 
   .dark {
-    --background: 222 47% 11%;
+    --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 15%;
+    --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 15%;
+    --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 173 80% 32%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 217 33% 20%;
+    --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 33% 20%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
     --accent: 24 95% 53%;
     --accent-foreground: 210 40% 98%;
@@ -62,9 +67,9 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217 33% 20%;
-    --input: 217 33% 20%;
-    --ring: 24 95% 53%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 173 80% 32%;
   }
 }
 
@@ -72,32 +77,29 @@
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground font-['Poppins'];
+    @apply bg-background text-foreground font-sans;
   }
 }
 
-.byways-title {
-  font-weight: 700;
-  letter-spacing: 1px;
+/* Utility class for the brand font */
+.font-brand {
+  font-family: 'Patrick Hand', cursive;
 }
 
-.byways-card {
-  @apply rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 bg-white;
+/* Animation Utilities */
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+  opacity: 0;
 }
 
-.byways-button {
-  @apply rounded-full px-6 py-3 font-semibold text-white transition-all duration-300 
-    bg-byways-primary hover:bg-byways-dark shadow-md hover:shadow-lg;
-}
-
-.byways-tile {
-  @apply cursor-pointer rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all 
-    duration-300 bg-white relative p-6 hover:scale-[1.02];
-}
-
-.byways-input {
-  @apply rounded-lg border border-byways-accent/20 py-3 px-4 bg-white/90 focus:ring-2 
-    focus:ring-byways-accent focus:border-transparent text-byways-dark;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

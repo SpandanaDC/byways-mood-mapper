@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,11 +23,13 @@ const Register = () => {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [locality, setLocality] = useState("Bengaluru");
+  const [email, setEmail] = useState(""); // Added Email State
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate(); // To redirect after registration
   
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
@@ -39,15 +40,45 @@ const Register = () => {
       });
       return;
     }
-    
-    // Simulating registration
-    toast({
-      title: "Registration Successful",
-      description: "Welcome to ByWays! Let's start exploring!",
-    });
-    
-    // In a real app, we'd handle registration here
-    window.location.href = "/";
+
+    try {
+      const response = await fetch('http://localhost:5000/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          age: parseInt(age), // Ensure age is sent as a number
+          locality
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Registration Successful",
+          description: "Welcome to ByWays! Please sign in.",
+        });
+        navigate("/login"); // Redirect to login page
+      } else {
+        toast({
+          title: "Registration Failed",
+          description: data.message || "An error occurred during registration.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast({
+        title: "Error",
+        description: "Could not connect to the server. Please try again later.",
+        variant: "destructive",
+      });
+    }
   };
   
   return (
@@ -78,6 +109,20 @@ const Register = () => {
                   placeholder="Enter your full name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  className="byways-input"
+                  required
+                />
+              </div>
+
+              {/* Added Email Field */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="byways-input"
                   required
                 />

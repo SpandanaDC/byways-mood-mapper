@@ -18,7 +18,12 @@ export default {
 			}
 		},
 		extend: {
+      fontFamily: {
+        sans: ['Poppins', 'sans-serif'],
+        brand: ['"Patrick Hand"', 'cursive'],
+      },
 			colors: {
+        'brand-cream': '#FFFBEB', // Add the cozy background color
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

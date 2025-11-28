@@ -1,17 +1,12 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 
-// Mood options
 const moods = [
   { value: "cozy", label: "Cozy" },
   { value: "adventurous", label: "Adventurous" },
@@ -23,141 +18,54 @@ const moods = [
   { value: "nature", label: "Nature" },
   { value: "historical", label: "Historical" },
   { value: "meditation", label: "Meditation" },
-  { value: "instagramable", label: "Instagramable" }
+  { value: "instagramable", label: "Instagramable" },
+  { value: "romantic", label: "Romantic" },
+  { value: "lively", label: "Lively" },
+  { value: "pet-friendly", label: "Pet-Friendly" },
+  { value: "classy", label: "Classy" },
+  { value: "books", label: "Bookworm" },
 ];
 
-// Group size options
 const groupSizes = ["1", "2", "3", "4", "5", "6", "7+"];
 
-// Budget ranges
 const budgetRanges = [
-  { value: "150-300", label: "₹150 - ₹300" },
-  { value: "300-600", label: "₹300 - ₹600" },
-  { value: "1000-1200", label: "₹1000 - ₹1200" },
-  { value: "1500-2000", label: "₹1500 - ₹2000" },
-  { value: "3000+", label: "₹3000+" }
+  { value: "0-300", label: "₹0 - ₹300 (Low)" },
+  { value: "300-600", label: "₹300 - ₹600 (Mid)" },
+  { value: "600-1000", label: "₹600 - ₹1000 (High)" },
+  { value: "1000-2000", label: "₹1000 - ₹2000 (V. High)" },
+  { value: "2000+", label: "₹2000+ (Splurge)" }
 ];
 
-// Sample recommendations based on user selections
-const getRecommendations = (
-  selectedMoods: string[], 
-  groupSize: string, 
-  budget: string
-) => {
-  // This is sample data that would normally come from a database
-  const hasCozy = selectedMoods.includes("cozy");
-  const hasNature = selectedMoods.includes("nature");
-  const hasPeaceful = selectedMoods.includes("peaceful");
-  const hasHungry = selectedMoods.includes("hungry");
-  const hasMiniGames = selectedMoods.includes("minigames");
-  const hasMeditation = selectedMoods.includes("meditation");
-  const hasChitchat = selectedMoods.includes("chitchat");
-
-  if (hasCozy && hasNature && hasPeaceful && budget === "150-300" && (groupSize === "3" || groupSize === "2")) {
-    return [
-      {
-        name: "Lal Bagh",
-        price: "₹30",
-        image: "https://images.unsplash.com/photo-1500673922987-e212871fec22",
-        tags: ["Nature", "Peaceful", "Walking"]
-      },
-      {
-        name: "Cubbon Park",
-        price: "Free",
-        image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-        tags: ["Nature", "Peaceful", "Jogging"]
-      }
-    ];
-  }
-  
-  if (hasHungry && hasMiniGames && budget === "1000-1200" && (groupSize === "4" || groupSize === "3")) {
-    return [
-      {
-        name: "Go Karting",
-        price: "₹330",
-        image: "https://source.unsplash.com/random/400x300/?go,karting",
-        tags: ["Games", "Fun", "Adventure"]
-      },
-      {
-        name: "Bowling",
-        price: "₹400",
-        image: "https://source.unsplash.com/random/400x300/?bowling",
-        tags: ["Games", "Indoor", "Group"]
-      },
-      {
-        name: "Lulu Mall",
-        price: "₹1000",
-        image: "https://source.unsplash.com/random/400x300/?mall,shopping",
-        tags: ["Shopping", "Food", "Entertainment"]
-      }
-    ];
-  }
-  
-  if (hasPeaceful && hasMeditation && budget === "150-300" && (groupSize === "2" || groupSize === "1")) {
-    return [
-      {
-        name: "Art of Living",
-        price: "Free",
-        image: "https://source.unsplash.com/random/400x300/?meditation,yoga",
-        tags: ["Meditation", "Peace", "Spiritual"]
-      },
-      {
-        name: "Pyramid Valley",
-        price: "Free",
-        image: "https://source.unsplash.com/random/400x300/?pyramid,meditation",
-        tags: ["Meditation", "Spiritual", "Nature"]
-      }
-    ];
-  }
-  
-  if (hasHungry && hasChitchat && budget === "300-600" && (groupSize === "3" || groupSize === "2")) {
-    return [
-      {
-        name: "Zero Degree",
-        price: "₹600",
-        image: "https://source.unsplash.com/random/400x300/?cafe,coffee",
-        tags: ["Food", "Cafe", "Hangout"]
-      },
-      {
-        name: "Skyline Pizzeria",
-        price: "₹400",
-        image: "https://source.unsplash.com/random/400x300/?pizza,restaurant",
-        tags: ["Food", "Pizza", "Casual"]
-      }
-    ];
-  }
-  
-  // Default recommendations
-  return [
-    {
-      name: "Church Street",
-      price: "Varies",
-      image: "https://source.unsplash.com/random/400x300/?street,shopping",
-      tags: ["Shopping", "Food", "Hangout"]
-    },
-    {
-      name: "UB City",
-      price: "₹1000+",
-      image: "https://source.unsplash.com/random/400x300/?luxury,mall",
-      tags: ["Luxury", "Shopping", "Food"]
-    },
-    {
-      name: "Wonderla",
-      price: "₹1200",
-      image: "https://source.unsplash.com/random/400x300/?amusement,park",
-      tags: ["Adventure", "Fun", "Group"]
-    }
-  ];
-};
+interface Place {
+  id: number;
+  name: string;
+  price: string;
+  tags: string[];
+  image: string;
+  groupSize: string[];
+}
 
 const MoodDiscovery = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [groupSize, setGroupSize] = useState("2");
   const [budget, setBudget] = useState("300-600");
-  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [places, setPlaces] = useState<Place[]>([]); // Store places from DB
+  const [recommendations, setRecommendations] = useState<Place[]>([]);
   const { toast } = useToast();
-  
+
+  // Fetch places from backend on load
+  useEffect(() => {
+    fetch('http://localhost:5000/api/places')
+      .then(res => res.json())
+      .then(data => {
+        console.log("Fetched places:", data); // Debugging log
+        setPlaces(data);
+      })
+      .catch(err => console.error("Error fetching places:", err));
+  }, []);
+
+  // Toggle Mood Selection
   const handleMoodToggle = (mood: string) => {
     if (selectedMoods.includes(mood)) {
       setSelectedMoods(selectedMoods.filter(m => m !== mood));
@@ -172,6 +80,61 @@ const MoodDiscovery = () => {
         });
       }
     }
+  };
+
+  // Filter Logic - Enhanced for debugging
+  const filterRecommendations = () => {
+    console.log("Filtering with:", { selectedMoods, groupSize, budget });
+
+    let [minBudgetStr, maxBudgetStr] = budget.split('-');
+    // Handle the "2000+" case
+    if (budget === "2000+") {
+        minBudgetStr = "2000";
+        maxBudgetStr = "100000"; // Arbitrary high number
+    }
+
+    const userMinBudget = parseInt(minBudgetStr);
+    const userMaxBudget = parseInt(maxBudgetStr);
+
+    const results = places.filter(place => {
+      // 1. Budget Filter
+      let placeMin = 0;
+      let placeMax = 0;
+      
+      if (place.price === "2000+") {
+          placeMin = 2000;
+          placeMax = 100000;
+      } else {
+          const parts = place.price.split('-');
+          if (parts.length === 2) {
+             placeMin = parseInt(parts[0]);
+             placeMax = parseInt(parts[1]);
+          } else {
+              // Handle simple prices like "500" if any exist in data, though seed data uses ranges
+              placeMin = parseInt(place.price) || 0;
+              placeMax = parseInt(place.price) || 0;
+          }
+      }
+
+      // Check for overlap in budget ranges
+      const budgetMatch = (placeMin <= userMaxBudget) && (userMinBudget <= placeMax);
+
+      // 2. Mood Filter (OR logic: match ANY selected mood)
+      // Changing to ANY match instead of ALL to increase result chances
+      const moodMatch = selectedMoods.some(mood => 
+        place.tags.map(t => t.toLowerCase()).includes(mood.toLowerCase())
+      );
+
+      // 3. Group Size Filter
+      // Check if the selected group size is in the place's supported group sizes
+      const groupMatch = place.groupSize.includes(groupSize) || 
+                         (groupSize === '7+' && place.groupSize.some(s => ['7+', '5', '6'].includes(s))); // Looser matching for large groups
+
+      return moodMatch && groupMatch && budgetMatch;
+    });
+
+    console.log("Found recommendations:", results);
+    return results;
   };
   
   const handleNext = () => {
@@ -188,7 +151,7 @@ const MoodDiscovery = () => {
       setCurrentStep(currentStep + 1);
     } else {
       // Generate recommendations
-      const results = getRecommendations(selectedMoods, groupSize, budget);
+      const results = filterRecommendations();
       setRecommendations(results);
       setCurrentStep(4);
     }
@@ -209,23 +172,22 @@ const MoodDiscovery = () => {
   };
   
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen flex flex-col bg-brand-cream">
       <Navbar />
       
       <main className="flex-1">
         <div className="container mx-auto px-4 py-6">
           <div className="max-w-3xl mx-auto">
-            <div className="mb-8">
-              <Link to="/" className="text-byways-primary hover:underline flex items-center mb-2">
+            <div className="mb-8 text-center md:text-left">
+              <Link to="/home" className="text-byways-primary hover:underline flex items-center mb-2 justify-center md:justify-start">
                 <ArrowRight className="mr-1 rotate-180" size={16} /> Back to Home
               </Link>
-              <h1 className="text-2xl md:text-3xl font-bold text-byways-dark">Where My Mood Goes?</h1>
-              <p className="text-byways-accent mt-1">
-                Let us find the perfect places based on your mood, group size, and budget
+              <h1 className="text-4xl md:text-5xl font-brand text-byways-dark">Where's the Vibe?</h1>
+              <p className="text-byways-accent mt-1 text-lg">
+                Find the perfect spot based on your mood, group, and budget!
               </p>
             </div>
             
-            {/* Progress indicator */}
             <div className="w-full bg-muted h-2 rounded-full mb-8 overflow-hidden">
               <div 
                 className="h-full bg-byways-primary transition-all duration-500 ease-out rounded-full"
@@ -233,106 +195,99 @@ const MoodDiscovery = () => {
               ></div>
             </div>
             
-            {/* Step 1: Select mood */}
             {currentStep === 1 && (
               <div className="animate-fade-in">
-                <h2 className="text-xl font-semibold mb-4">What's your mood?</h2>
-                <p className="text-byways-accent mb-6">Select up to 3 moods that match how you're feeling</p>
+                <h2 className="text-3xl font-brand text-stone-700 mb-4 text-center">What's your mood?</h2>
+                <p className="text-stone-500 mb-6 text-center">Select up to 3 vibes that match how you're feeling</p>
                 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {moods.map((mood) => (
-                    <button
-                      key={mood.value}
-                      onClick={() => handleMoodToggle(mood.value)}
-                      className={`p-4 rounded-lg border flex flex-col items-center justify-center transition-all text-center
-                        ${
-                          selectedMoods.includes(mood.value) 
-                            ? "border-byways-primary bg-byways-primary/10 text-byways-primary" 
-                            : "border-byways-accent/20 hover:border-byways-accent/40"
+                  {moods.map((mood) => {
+                    const isSelected = selectedMoods.includes(mood.value);
+                    return (
+                      <button
+                        key={mood.value}
+                        onClick={() => handleMoodToggle(mood.value)}
+                        className={`p-4 rounded-2xl flex flex-col items-center justify-center transition-all text-center border-2 cursor-pointer ${
+                          isSelected
+                            ? "bg-primary text-primary-foreground border-primary shadow-md transform scale-105"
+                            : "bg-white text-stone-700 border-stone-200 hover:border-primary/50 hover:bg-primary/5"
                         }`}
-                    >
-                      <span>{mood.label}</span>
-                    </button>
-                  ))}
+                      >
+                        <span className="font-semibold text-base">{mood.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
             
-            {/* Step 2: Group size */}
             {currentStep === 2 && (
               <div className="animate-fade-in">
-                <h2 className="text-xl font-semibold mb-4">How many of us?</h2>
-                <p className="text-byways-accent mb-6">Select the number of people in your group</p>
+                <h2 className="text-3xl font-brand text-stone-700 mb-4 text-center">How many of you?</h2>
+                <p className="text-stone-500 mb-6 text-center">Just tap your group size</p>
                 
-                <RadioGroup value={groupSize} onValueChange={setGroupSize} className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-3">
-                  {groupSizes.map((size) => (
-                    <div key={size} className="flex items-center">
-                      <Label
-                        htmlFor={`size-${size}`}
-                        className={`w-full p-4 rounded-lg border text-center cursor-pointer transition-all
-                          ${
-                            groupSize === size 
-                              ? "border-byways-primary bg-byways-primary/10 text-byways-primary" 
-                              : "border-byways-accent/20 hover:border-byways-accent/40"
+                <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-7 gap-3">
+                  {groupSizes.map((size) => {
+                     const isSelected = groupSize === size;
+                     return (
+                      <button
+                        key={size}
+                        onClick={() => setGroupSize(size)}
+                        className={`p-4 rounded-2xl border-2 text-center cursor-pointer transition-all text-lg font-medium ${
+                            isSelected
+                              ? "bg-primary text-primary-foreground border-primary shadow-md transform scale-105"
+                              : "bg-white text-stone-700 border-stone-200 hover:border-primary/50 hover:bg-primary/5"
                           }`}
                       >
-                        <RadioGroupItem 
-                          id={`size-${size}`}
-                          value={size}
-                          className="sr-only"
-                        />
                         {size}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
             
-            {/* Step 3: Budget */}
             {currentStep === 3 && (
               <div className="animate-fade-in">
-                <h2 className="text-xl font-semibold mb-4">What's your budget?</h2>
-                <p className="text-byways-accent mb-6">Select a budget range for your outing</p>
+                <h2 className="text-3xl font-brand text-stone-700 mb-4 text-center">What's your budget?</h2>
+                <p className="text-stone-500 mb-6 text-center">Select a budget range per person</p>
                 
-                <RadioGroup value={budget} onValueChange={setBudget} className="space-y-3">
-                  {budgetRanges.map((range) => (
-                    <div key={range.value} className="flex items-center">
-                      <Label
-                        htmlFor={`budget-${range.value}`}
-                        className={`w-full p-4 rounded-lg border flex items-center justify-between cursor-pointer transition-all
-                          ${
-                            budget === range.value 
-                              ? "border-byways-primary bg-byways-primary/10 text-byways-primary" 
-                              : "border-byways-accent/20 hover:border-byways-accent/40"
-                          }`}
-                      >
-                        <RadioGroupItem 
-                          id={`budget-${range.value}`}
-                          value={range.value}
-                        />
-                        <span className="ml-2">{range.label}</span>
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
+                <div className="space-y-3">
+                  {budgetRanges.map((range) => {
+                    const isSelected = budget === range.value;
+                    return (
+                    <button
+                      key={range.value}
+                      onClick={() => setBudget(range.value)}
+                      className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${
+                          isSelected
+                              ? "bg-primary text-primary-foreground border-primary shadow-md transform scale-[1.01]"
+                              : "bg-white text-stone-700 border-stone-200 hover:border-primary/50 hover:bg-primary/5"
+                        }`}
+                    >
+                      <span className="ml-2 text-base font-semibold">{range.label}</span>
+                      <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${isSelected ? "border-white" : "border-stone-400"}`}>
+                          {isSelected && <div className="h-2.5 w-2.5 rounded-full bg-white" />}
+                      </div>
+                    </button>
+                  )})}
+                </div>
               </div>
             )}
             
-            {/* Step 4: Recommendations */}
             {currentStep === 4 && (
               <div className="animate-fade-in">
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                   <div>
-                    <h2 className="text-xl font-semibold mb-1">Your Recommendations</h2>
-                    <p className="text-byways-accent">
+                    <h2 className="text-3xl font-brand text-stone-700 mb-1 text-center sm:text-left">Your Hangouts</h2>
+                    <p className="text-stone-500 text-center sm:text-left">
                       Based on your mood: {selectedMoods.map(m => moods.find(mood => mood.value === m)?.label).join(", ")}
                     </p>
                   </div>
                   <Button 
                     variant="outline" 
                     onClick={handleReset}
-                    className="border-byways-primary text-byways-primary hover:bg-byways-primary hover:text-white"
+                    className="border-byways-primary text-byways-primary hover:bg-byways-primary hover:text-white rounded-lg"
                   >
                     Start Over
                   </Button>
@@ -341,57 +296,72 @@ const MoodDiscovery = () => {
                 {recommendations.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                     {recommendations.map((place, index) => (
-                      <Card key={index} className="byways-card overflow-hidden border-none shadow-lg">
+                      <Card key={index} className="byways-card overflow-hidden shadow-lg transform transition-transform hover:scale-[1.02]">
                         <div 
                           className="h-48 bg-cover bg-center" 
                           style={{ backgroundImage: `url(${place.image})` }}
+                          // Fallback to placeholder if local image fails to load
+                          onError={(e) => { (e.currentTarget as HTMLDivElement).style.backgroundImage = `url(https://placehold.co/600x400/f9d8b7/8f5b33?text=${place.name.replace(/ /g, '+')})` }}
                         ></div>
                         <CardContent className="p-4">
-                          <h3 className="font-semibold text-byways-dark text-lg">{place.name}</h3>
+                          <h3 className="font-brand text-2xl text-stone-700">{place.name}</h3>
                           <div className="flex items-center text-byways-accent mt-1">
-                            <span className="text-sm">{place.price}</span>
+                            <span className="text-sm font-medium">₹{place.price}</span>
                             <Separator orientation="vertical" className="h-4 mx-2" />
                             <div className="flex flex-wrap gap-1">
                               {place.tags.map((tag: string, i: number) => (
-                                <span key={i} className="text-xs bg-byways-light px-2 py-0.5 rounded-full">
+                                <span key={i} className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">
                                   {tag}
                                 </span>
                               ))}
                             </div>
                           </div>
                         </CardContent>
-                        <CardFooter className="p-4 pt-0 flex justify-between">
-                          <Button variant="outline" size="sm" className="text-byways-primary border-byways-primary">
-                            View Details
-                          </Button>
-                          <Button size="sm" className="bg-byways-primary hover:bg-byways-dark">
-                            <MapPin size={16} className="mr-1" /> Directions
-                          </Button>
+                        <CardFooter className="p-4 pt-0 flex justify-between gap-2">
+                           {/* Navigate to internal details page */}
+                          <Link to={`/place/${place.id}`} className="w-full">
+                              <Button variant="outline" size="sm" className="w-full text-primary border-primary hover:bg-primary hover:text-white rounded-lg">
+                                View Details
+                              </Button>
+                          </Link>
+                          
+                          {/* Open Google Maps directly */}
+                          <a 
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name + " Bangalore")}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="w-full"
+                          >
+                              <Button size="sm" className="w-full bg-primary hover:bg-primary/90 rounded-lg">
+                                <MapPin size={16} className="mr-1" /> Maps
+                              </Button>
+                          </a>
                         </CardFooter>
                       </Card>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center p-8 border border-dashed rounded-lg">
-                    <p className="text-byways-accent">No recommendations found. Please try different preferences.</p>
+                  <div className="text-center p-8 border-2 border-dashed border-stone-300 rounded-2xl bg-white/50">
+                    <p className="text-stone-500 font-brand text-2xl">No exact matches found!</p>
+                    <p className="text-stone-500">Try removing a mood or changing your budget.</p>
+                    <p className="text-stone-400 text-sm mt-2">Debug info: Filtered {places.length} places.</p>
                   </div>
                 )}
               </div>
             )}
             
-            {/* Navigation buttons */}
             {currentStep < 4 && (
-              <div className="flex justify-between mt-8">
+              <div className="flex justify-between mt-10">
                 <Button
                   onClick={handleBack}
                   variant="outline"
                   disabled={currentStep === 1}
-                  className="border-byways-accent/20"
+                  className="border-stone-300 bg-white rounded-lg px-6 py-5 text-base font-semibold"
                 >
                   Back
                 </Button>
-                <Button onClick={handleNext} className="bg-byways-primary hover:bg-byways-dark">
-                  {currentStep < 3 ? "Next" : "Find Places"}
+                <Button onClick={handleNext} className="btn-brand !w-auto px-8">
+                  {currentStep < 3 ? "Next" : "Find Places!"}
                 </Button>
               </div>
             )}

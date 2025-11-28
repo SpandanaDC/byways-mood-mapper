@@ -11,22 +11,57 @@ app.use(express.json());
 const MONGO_URI = process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI)
-  .then(() => console.log(" Connected to MongoDB"))
-  .catch(err => console.error(" MongoDB connection error:", err));
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch(err => console.error("❌ MongoDB connection error:", err));
 
-// Define the Schema (Blueprint for your data)
+// --- SCHEMAS ---
+
+// 1. Place Schema
 const placeSchema = new mongoose.Schema({
   id: Number,
   name: String,
   price: String,
   tags: [String],
   image: String,
-  groupSize: [String]
+  groupSize: [String],
+  description: String,
+  location: String,
+  reviews: Number,
+  rating: Number
 });
 
-const Place = mongoose.model('Place', placeSchema);
+const Place = mongoose.model('Place', placeSchema, 'places');
 
-// API Route to get places
+// 2. Itinerary Schema
+const itinerarySchema = new mongoose.Schema({
+  type: String,
+  budget: String,
+  plan: [{
+    time: String,
+    activity: String,
+    description: String,
+    image: String
+  }]
+});
+
+const Itinerary = mongoose.model('Itinerary', itinerarySchema, 'itineraries');
+
+// 3. User Schema (New)
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true }, // Email acts as User ID
+  password: { type: String, required: true }, // Store hashed password ideally
+  age: Number,
+  locality: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+const User = mongoose.model('User', userSchema, 'users');
+
+
+// --- API ROUTES ---
+
+// 1. Get all places
 app.get('/api/places', async (req, res) => {
   try {
     const places = await Place.find();
@@ -36,5 +71,74 @@ app.get('/api/places', async (req, res) => {
   }
 });
 
+// 2. Get single place by ID
+app.get('/api/places/:id', async (req, res) => {
+  try {
+    const place = await Place.findOne({ id: parseInt(req.params.id) });
+    if (!place) return res.status(404).json({ message: "Place not found" });
+    res.json(place);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 3. Get all itineraries
+app.get('/api/itineraries', async (req, res) => {
+  try {
+    const itineraries = await Itinerary.find();
+    res.json(itineraries);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 4. Register User
+app.post('/api/register', async (req, res) => {
+  const { name, email, password, age, locality } = req.body;
+
+  try {
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const newUser = new User({
+      name,
+      email, // 'email' will be used as userId
+      password, // In production, hash this password!
+      age,
+      locality
+    });
+
+    await newUser.save();
+    res.status(201).json({ message: "User registered successfully", user: newUser });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// 5. Login User
+app.post('/api/login', async (req, res) => {
+  const { userId, password } = req.body; // userId is the email
+
+  try {
+    const user = await User.findOne({ email: userId });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // In production, compare hashed passwords
+    if (user.password !== password) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    res.json({ message: "Login successful", user });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(` Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
