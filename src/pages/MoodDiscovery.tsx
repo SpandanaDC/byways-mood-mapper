@@ -45,30 +45,47 @@ interface Place {
   groupSize: string[];
 }
 
+// --- MOCK DATA FALLBACK ---
+const mockPlaces: Place[] = [
+  { id: 1, name: "Dyu Art Cafe", price: "300-600", tags: ["cozy", "instagramable", "chitchat", "romantic"], image: "/images/dyu-art-cafe.avif", groupSize: ["1", "2", "3"] },
+  { id: 2, name: "Lalbagh Botanical Garden", price: "0-300", tags: ["nature", "peaceful", "instagramable", "pet-friendly"], image: "/images/lalbagh.jpg", groupSize: ["1", "2", "3", "4", "5", "6", "7+"] },
+  { id: 3, name: "Cubbon Park", price: "0-300", tags: ["nature", "peaceful", "pet-friendly", "meditation"], image: "/images/cubbon-park.jpg", groupSize: ["1", "2", "3", "4", "5", "6", "7+"] },
+  { id: 4, name: "Ramanagara Hills", price: "0-300", tags: ["adventurous", "nature", "fun"], image: "/images/ramanagara.jpg", groupSize: ["2", "3", "4", "5", "6", "7+"] },
+  { id: 5, name: "Wonderla", price: "2000+", tags: ["adventurous", "fun", "lively"], image: "/images/Wonderla.jpg", groupSize: ["2", "3", "4", "5", "6", "7+"] },
+  { id: 10, name: "Third Wave Coffee", price: "300-600", tags: ["cozy", "chitchat", "hungry"], image: "/images/third-wave.jpg", groupSize: ["1", "2", "3", "4"] },
+  { id: 11, name: "Truffles", price: "300-600", tags: ["hungry", "lively", "chitchat"], image: "/images/truffles.avif", groupSize: ["2", "3", "4", "5", "6"] },
+  { id: 13, name: "Bangalore Palace", price: "300-600", tags: ["historical", "instagramable", "romantic"], image: "/images/bangalore-palace.jpg", groupSize: ["1", "2", "3", "4"] },
+  { id: 16, name: "High Ultra Lounge", price: "2000+", tags: ["romantic", "classy", "lively", "instagramable"], image: "/images/high-ultra.jpeg", groupSize: ["2", "3", "4"] },
+  { id: 19, name: "Toit Brewpub", price: "1000-2000", tags: ["lively", "hungry", "chitchat", "fun", "group"], image: "/images/toit.jpeg", groupSize: ["3", "4", "5", "6", "7+"] },
+];
+
 const MoodDiscovery = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [groupSize, setGroupSize] = useState("2");
   const [budget, setBudget] = useState("300-600");
-  const [places, setPlaces] = useState<Place[]>([]); // Store places from DB
+  const [places, setPlaces] = useState<Place[]>([]); 
   const [recommendations, setRecommendations] = useState<Place[]>([]);
   const { toast } = useToast();
 
-  // Fetch places from backend on load
+  // Fetch places from backend on load, fallback to mock data on error
   useEffect(() => {
-    // UPDATED: Using relative path '/api/places' which works in Prod and Dev
     fetch('/api/places')
-      .then(res => res.json())
+      .then(res => {
+          if (!res.ok) throw new Error("Network response was not ok");
+          return res.json();
+      })
       .then(data => {
-        console.log("Fetched places:", data); 
+        console.log("Fetched places from DB:", data); 
         setPlaces(data);
       })
       .catch(err => {
-        console.error("Error fetching places:", err);
+        console.warn("DB Connection failed, using Mock Data:", err);
+        setPlaces(mockPlaces); // <--- FALLBACK HAPPENS HERE
         toast({
-            title: "Connection Error",
-            description: "Could not connect to the database.",
-            variant: "destructive"
+            title: "Offline Mode",
+            description: "Using offline data as database is unreachable.",
+            variant: "default"
         });
       });
   }, []);
@@ -90,15 +107,14 @@ const MoodDiscovery = () => {
     }
   };
 
-  // Filter Logic - Enhanced for debugging
+  // Filter Logic
   const filterRecommendations = () => {
     console.log("Filtering with:", { selectedMoods, groupSize, budget });
 
     let [minBudgetStr, maxBudgetStr] = budget.split('-');
-    // Handle the "2000+" case
     if (budget === "2000+") {
         minBudgetStr = "2000";
-        maxBudgetStr = "100000"; // Arbitrary high number
+        maxBudgetStr = "100000"; 
     }
 
     const userMinBudget = parseInt(minBudgetStr);
@@ -118,24 +134,21 @@ const MoodDiscovery = () => {
              placeMin = parseInt(parts[0]);
              placeMax = parseInt(parts[1]);
           } else {
-              // Handle simple prices like "500" if any exist in data, though seed data uses ranges
               placeMin = parseInt(place.price) || 0;
               placeMax = parseInt(place.price) || 0;
           }
       }
 
-      // Check for overlap in budget ranges
       const budgetMatch = (placeMin <= userMaxBudget) && (userMinBudget <= placeMax);
 
-      // 2. Mood Filter (OR logic: match ANY selected mood)
+      // 2. Mood Filter (OR logic)
       const moodMatch = selectedMoods.some(mood => 
         place.tags.map(t => t.toLowerCase()).includes(mood.toLowerCase())
       );
 
       // 3. Group Size Filter
-      // Check if the selected group size is in the place's supported group sizes
       const groupMatch = place.groupSize.includes(groupSize) || 
-                         (groupSize === '7+' && place.groupSize.some(s => ['7+', '5', '6'].includes(s))); // Looser matching for large groups
+                         (groupSize === '7+' && place.groupSize.some(s => ['7+', '5', '6'].includes(s))); 
 
       return moodMatch && groupMatch && budgetMatch;
     });
@@ -157,7 +170,6 @@ const MoodDiscovery = () => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Generate recommendations
       const results = filterRecommendations();
       setRecommendations(results);
       setCurrentStep(4);

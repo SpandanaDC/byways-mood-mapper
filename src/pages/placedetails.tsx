@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Share2, Star } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { useToast } from "@/hooks/use-toast";
 
 interface Place {
     id: number;
@@ -17,17 +18,34 @@ interface Place {
     googleMapsUrl?: string;
 }
 
+// --- MOCK DATA FALLBACK (Subset of your places) ---
+// This ensures that if the DB is down, clicking a place still works.
+const mockPlaces: Place[] = [
+  { id: 1, name: "Dyu Art Cafe", price: "300-600", tags: ["cozy"], image: "/images/dyu-art-cafe.avif", location: "Koramangala", rating: 4.5, reviews: 1200, description: "A beautiful art cafe in an old bungalow style setting." },
+  { id: 2, name: "Lalbagh Botanical Garden", price: "0-300", tags: ["nature"], image: "/images/lalbagh.jpg", location: "Mavalli", rating: 4.6, reviews: 5000, description: "A botanical garden with an aquarium and glass house." },
+  { id: 3, name: "Cubbon Park", price: "0-300", tags: ["nature"], image: "/images/cubbon-park.jpg", location: "Central Bengaluru", rating: 4.7, reviews: 8000, description: "A landmark 'lung' area of the Bengaluru city." },
+  { id: 4, name: "Ramanagara Hills", price: "0-300", tags: ["adventurous"], image: "/images/ramanagara.jpg", location: "Ramanagara", rating: 4.4, reviews: 300, description: "Famous for trekking and rock climbing." },
+  { id: 5, name: "Wonderla", price: "2000+", tags: ["adventurous"], image: "/images/Wonderla.jpg", location: "Mysore Road", rating: 4.6, reviews: 15000, description: "One of the largest amusement parks in India." },
+  { id: 10, name: "Third Wave Coffee", price: "300-600", tags: ["cozy"], image: "/images/third-wave.jpg", location: "Indiranagar", rating: 4.5, reviews: 500, description: "Artisanal coffee roasters." },
+  { id: 11, name: "Truffles", price: "300-600", tags: ["hungry"], image: "/images/truffles.avif", location: "St. Marks Road", rating: 4.6, reviews: 10000, description: "Famous for burgers and steaks." },
+  { id: 12, name: "Church Street", price: "300-600", tags: ["lively"], image: "/images/church-street.jpg", location: "Central Bengaluru", rating: 4.4, reviews: 5000, description: "Bustling street with cafes, bookshops, and restaurants." },
+  { id: 13, name: "Bangalore Palace", price: "300-600", tags: ["historical"], image: "/images/bangalore-palace.jpg", location: "Vasanth Nagar", rating: 4.4, reviews: 8000, description: "Tudor-style architecture inspired by Windsor Castle." },
+  { id: 16, name: "High Ultra Lounge", price: "2000+", tags: ["romantic"], image: "/images/high-ultra.jpeg", location: "Malleshwaram", rating: 4.4, reviews: 1500, description: "Rooftop lounge with city views." },
+  { id: 19, name: "Toit Brewpub", price: "1000-2000", tags: ["lively"], image: "/images/toit.jpeg", location: "Indiranagar", rating: 4.6, reviews: 12000, description: "Famous microbrewery." },
+];
+
 const PlaceDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [place, setPlace] = useState<Place | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchPlace = async () => {
         if (!id) return;
         try {
-            // UPDATED: Using relative path '/api/places'
+            // Try fetching from API
             const response = await fetch(`/api/places`);
             if (response.ok) {
                 const allPlaces = await response.json();
@@ -45,11 +63,35 @@ const PlaceDetails = () => {
                     };
                     setPlace(enhancedData);
                 } else {
-                    console.error("Place not found");
+                   // If DB connects but place ID is missing, fallback to mock search
+                   console.warn("Place ID not found in DB, checking mock data...");
+                   throw new Error("Place not found in DB");
                 }
+            } else {
+                throw new Error("API Error");
             }
         } catch (error) {
-            console.error("Error fetching place:", error);
+            console.warn("Error fetching place, using mock data:", error);
+            // FALLBACK LOGIC
+            const foundMock = mockPlaces.find((p) => p.id === parseInt(id));
+            if (foundMock) {
+                 const enhancedMock = {
+                    ...foundMock,
+                    location: foundMock.location || "Bengaluru, Karnataka",
+                    rating: foundMock.rating || 4.5,
+                    reviews: foundMock.reviews || 100,
+                    description: foundMock.description || `Experience the vibe at ${foundMock.name}. A perfect spot for your mood.`,
+                    googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(foundMock.name + " Bangalore")}`
+                };
+                setPlace(enhancedMock);
+                toast({
+                    title: "Offline Mode",
+                    description: "Showing offline details for this place.",
+                    variant: "default"
+                });
+            } else {
+                console.error("Place not found in mock data either");
+            }
         } finally {
             setLoading(false);
         }
@@ -58,7 +100,13 @@ const PlaceDetails = () => {
   }, [id]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center font-brand text-xl">Loading...</div>;
-  if (!place) return <div className="min-h-screen flex items-center justify-center font-brand text-xl">Place not found.</div>;
+  
+  if (!place) return (
+    <div className="min-h-screen flex flex-col items-center justify-center font-brand text-xl gap-4">
+        <p>Place not found.</p>
+        <Button onClick={() => navigate('/home')}>Go Home</Button>
+    </div>
+  );
 
   const handleDirections = () => {
     if (place.googleMapsUrl) {

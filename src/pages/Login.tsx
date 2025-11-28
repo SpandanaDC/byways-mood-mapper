@@ -4,19 +4,59 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-// import { useToast } from "@/hooks/use-toast"; // Assuming you have this hook
+import { useToast } from "@/hooks/use-toast";
+
+// --- MOCK USER FALLBACK ---
+const mockUser = {
+  email: "user@example.com",
+  password: "password123",
+  name: "Namma Traveller"
+};
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  // const { toast } = useToast();
+  const { toast } = useToast();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Add login logic here
-    // toast({ title: "Welcome back!", description: "Successfully logged in." });
-    navigate("/home"); // Navigate to main page
+    
+    try {
+      // UPDATED: Use relative path /api/login
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast({ title: "Welcome back!", description: "Successfully logged in." });
+        navigate("/home");
+      } else {
+        throw new Error(data.message || "Login failed");
+      }
+    } catch (error) {
+      console.warn("Login error, trying mock login:", error);
+      
+      // FALLBACK LOGIC
+      if (email === mockUser.email && password === mockUser.password) {
+         toast({
+            title: "Offline Mode",
+            description: "Logged in with offline credentials.",
+            variant: "default"
+         });
+         navigate("/home");
+      } else {
+        toast({
+            title: "Login Failed",
+            description: "Invalid email or password (checked online & offline).",
+            variant: "destructive"
+        });
+      }
+    }
   };
 
   return (
@@ -89,6 +129,10 @@ const Login = () => {
             <Link to="/register" className="text-primary font-semibold hover:underline">
               Sign up
             </Link>
+          </div>
+          {/* Helper text for demo purposes */}
+          <div className="text-xs text-stone-400 mt-2">
+            Demo Login: user@example.com / password123
           </div>
         </CardFooter>
       </Card>
