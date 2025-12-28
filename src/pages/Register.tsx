@@ -7,47 +7,24 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
-const indianCities = [
-  "Bengaluru",
-  "Mumbai",
-  "Delhi",
-  "Hyderabad",
-  "Chennai",
-  "Kolkata",
-  "Pune",
-  "Ahmedabad",
-  "Jaipur"
+const bengaluruRegions = [
+  "Bengaluru North",
+  "Bengaluru South",
+  "Bengaluru East",
+  "Bengaluru West",
+  "Central Bengaluru"
 ];
 
 const Register = () => {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
-  const [locality, setLocality] = useState("Bengaluru");
+  const [locality, setLocality] = useState("Bengaluru South");
   const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate(); 
   
-  // --- NEW: Mock Social Signup Handler ---
-  const handleSocialSignup = (provider: string) => {
-      const socialUser = {
-          email: `${provider.toLowerCase()}@user.com`,
-          password: "social-login",
-          name: `${provider} User`
-      };
-      localStorage.setItem('tempMockUser', JSON.stringify(socialUser));
-
-      toast({
-          title: `Signed up with ${provider}`,
-          description: "Redirecting to home...",
-      });
-
-      setTimeout(() => {
-          navigate("/home");
-      }, 800);
-  };
-
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -71,7 +48,7 @@ const Register = () => {
           email,
           password,
           age: parseInt(age), 
-          locality
+          locality 
         }),
       });
 
@@ -86,22 +63,13 @@ const Register = () => {
       } else {
         throw new Error(data.message || "Registration failed");
       }
-    } catch (error) {
-      console.warn("Registration error, using mock registration:", error);
-      
-      // Save the user to localStorage so Login.tsx can find them!
-      const newMockUser = { email, password, name };
-      localStorage.setItem('tempMockUser', JSON.stringify(newMockUser));
-
+    } catch (error: any) {
+      console.error("Registration error:", error);
       toast({
-          title: "Offline Mode",
-          description: "Registration simulated (Database unreachable). You can now log in with these credentials.",
-          variant: "default"
+          title: "Registration Failed",
+          description: error.message || "Could not connect to server.",
+          variant: "destructive"
       });
-      
-      setTimeout(() => {
-          navigate("/login");
-      }, 1500);
     }
   };
   
@@ -167,15 +135,15 @@ const Register = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="locality">Locality</Label>
+                <Label htmlFor="locality">Region</Label>
                 <Select value={locality} onValueChange={setLocality} required>
                   <SelectTrigger className="byways-input">
-                    <SelectValue placeholder="Select your city" />
+                    <SelectValue placeholder="Select your region" />
                   </SelectTrigger>
                   <SelectContent>
-                    {indianCities.map((city) => (
-                      <SelectItem key={city} value={city}>
-                        {city}
+                    {bengaluruRegions.map((region) => (
+                      <SelectItem key={region} value={region}>
+                        {region}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -212,41 +180,6 @@ const Register = () => {
                 Create Account
               </Button>
             </form>
-            
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-byways-light"></span>
-              </div>
-              <div className="relative flex justify-center">
-                <span className="bg-background px-4 text-sm text-byways-accent">
-                  Or sign up with
-                </span>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-3 gap-3">
-              <Button 
-                variant="outline" 
-                className="border-byways-accent/20"
-                onClick={() => handleSocialSignup("Google")}
-              >
-                Google
-              </Button>
-              <Button 
-                variant="outline" 
-                className="border-byways-accent/20"
-                onClick={() => handleSocialSignup("Facebook")}
-              >
-                Facebook
-              </Button>
-              <Button 
-                variant="outline" 
-                className="border-byways-accent/20"
-                onClick={() => handleSocialSignup("Instagram")}
-              >
-                Instagram
-              </Button>
-            </div>
           </CardContent>
           <CardFooter className="flex justify-center border-t border-byways-light pt-6">
             <p className="text-sm text-byways-accent">

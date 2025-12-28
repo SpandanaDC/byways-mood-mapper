@@ -6,39 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 
-// --- MOCK USER FALLBACK ---
-const defaultMockUser = {
-  email: "user@example.com",
-  password: "password123",
-  name: "Namma Traveller"
-};
-
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // --- NEW: Mock Social Login Handler ---
-  const handleSocialLogin = (provider: string) => {
-    // Create a mock user for social login
-    const socialUser = {
-        email: `${provider.toLowerCase()}@user.com`,
-        password: "social-login",
-        name: `${provider} User`
-    };
-    // Save to localStorage so app thinks they are logged in
-    localStorage.setItem('tempMockUser', JSON.stringify(socialUser));
-
-    toast({
-        title: `Logged in with ${provider}`,
-        description: "Redirecting to home...",
-    });
-
-    setTimeout(() => {
-        navigate("/home");
-    }, 800);
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,40 +25,22 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
+        // Save User to Browser Memory for Profile Page
+        console.log("Login success:", data.user);
+        localStorage.setItem("currentUser", JSON.stringify(data.user));
+        
         toast({ title: "Welcome back!", description: "Successfully logged in." });
-        navigate("/home");
+        navigate("/home"); 
       } else {
         throw new Error(data.message || "Login failed");
       }
-    } catch (error) {
-      console.warn("Login error, trying mock login:", error);
-      
-      // FALLBACK LOGIC
-      // 1. Check hardcoded mock user
-      let isValid = (email === defaultMockUser.email && password === defaultMockUser.password);
-      
-      // 2. Check localStorage mock user (if registered in this session)
-      if (!isValid) {
-          const storedUser = localStorage.getItem('tempMockUser');
-          if (storedUser) {
-              const parsedUser = JSON.parse(storedUser);
-              if (email === parsedUser.email && password === parsedUser.password) {
-                  isValid = true;
-              }
-          }
-      }
-
-      if (isValid) {
-         // Removed the explicit "Offline Mode" toast here as requested
-         // Just navigate directly on successful mock login
-         navigate("/home");
-      } else {
-        toast({
-            title: "Login Failed",
-            description: "Invalid email or password.",
-            variant: "destructive"
-        });
-      }
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast({
+          title: "Login Failed",
+          description: error.message || "Invalid credentials",
+          variant: "destructive"
+      });
     }
   };
 
@@ -133,34 +87,6 @@ const Login = () => {
               Sign In
             </Button>
           </form>
-          
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Button 
-              variant="outline" 
-              className="h-12 rounded-xl hover:bg-slate-50"
-              onClick={() => handleSocialLogin("Google")}
-            >
-              {/* Google Icon Placeholder */}
-              <span className="mr-2 font-bold text-blue-500">G</span> Google
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-12 rounded-xl hover:bg-slate-50"
-              onClick={() => handleSocialLogin("Facebook")}
-            >
-              {/* Facebook Icon Placeholder */}
-              <span className="mr-2 font-bold text-blue-700">f</span> Facebook
-            </Button>
-          </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-2 text-center">
           <div className="text-sm text-muted-foreground">
@@ -168,10 +94,6 @@ const Login = () => {
             <Link to="/register" className="text-primary font-semibold hover:underline">
               Sign up
             </Link>
-          </div>
-          {/* Helper text for demo purposes */}
-          <div className="text-xs text-stone-400 mt-2">
-            Demo Login: user@example.com / password123
           </div>
         </CardFooter>
       </Card>

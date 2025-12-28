@@ -3,19 +3,18 @@ import { ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import ImageSlider from "@/components/ImageSlider";
 
-const Home = () => {
-  // Real data for the Trending section - ensure IDs match your backend/seed data
+const Home = () =>{ // FIXED IDs to match the Database exactly
   const trendingPlaces = [
     { 
-      id: 3, 
+      id: 1,  // Correct ID for Cubbon Park
       name: "Cubbon Park", 
-      image: "/images/cubbon-park.jpg", // Example path - we will set this up later
+      image: "/images/cubbon-park.jpg", 
       description: "Outdoor • Nature", 
       price: "₹0 - ₹300",
       tag: "Relaxing"
     },
     { 
-      id: 2, 
+      id: 2,  // Correct ID for Lalbagh
       name: "Lalbagh Garden", 
       image: "/images/lalbagh.jpg", 
       description: "Nature • Flowers", 
@@ -23,12 +22,12 @@ const Home = () => {
       tag: "Peaceful"
     },
     { 
-      id: 12, 
-      name: "Church Street", 
-      image: "/images/church-street.jpg", 
-      description: "Lively • Shopping", 
+      id: 11, // Changed to Truffles (Since Church St generic isn't in DB, Truffles is the best match nearby)
+      name: "Truffles", 
+      image: "/images/truffles.avif", 
+      description: "Lively • Food", 
       price: "₹300 - ₹600",
-      tag: "Fun"
+      tag: "Hungry"
     }
   ];
 
@@ -94,7 +93,7 @@ const Home = () => {
                       src={place.image} 
                       alt={place.name}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      onError={(e) => { (e.currentTarget as HTMLDivElement).src = `https://placehold.co/600x400?text=${place.name}` }} 
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://placehold.co/600x400?text=${place.name}` }} 
                     />
                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold text-foreground shadow-sm flex items-center">
                       4.5 <span className="text-yellow-500 ml-0.5">★</span>
