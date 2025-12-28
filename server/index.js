@@ -147,7 +147,7 @@ app.post('/api/login', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-// [EXAM REQ] PUT Operation - Updates User Location
+// PUT Operation - Updates User Location
 app.put('/api/users/:email', async (req, res) => {
   const { email } = req.params;
   const { locality } = req.body;
