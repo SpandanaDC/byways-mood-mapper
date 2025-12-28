@@ -68,28 +68,28 @@ const MoodDiscovery = () => {
   const [recommendations, setRecommendations] = useState<Place[]>([]);
   const { toast } = useToast();
 
-  // Fetch places from backend on load, fallback to mock data on error
-  useEffect(() => {
-    fetch('/api/places')
-      .then(res => {
-          if (!res.ok) throw new Error("Network response was not ok");
-          return res.json();
-      })
-      .then(data => {
-        console.log("Fetched places from DB:", data); 
-        setPlaces(data);
-      })
-      .catch(err => {
-        console.warn("DB Connection failed, using Mock Data:", err);
-        setPlaces(mockPlaces); // <--- FALLBACK HAPPENS HERE
-        toast({
-            title: "Offline Mode",
-            description: "Using offline data as database is unreachable.",
-            variant: "default"
-        });
+ // STRICT MODE: Only loads from Real Database
+useEffect(() => {
+  fetch('/api/places')
+    .then(res => {
+        if (!res.ok) throw new Error("Database Error");
+        return res.json();
+    })
+    .then(data => {
+      console.log("✅ LIVE DB DATA:", data); 
+      setPlaces(data);
+    })
+    .catch(err => {
+      // If this happens, your database is NOT connected.
+      // No mock data will load. The page will be empty.
+      console.error("❌ FATAL: Database not reachable", err);
+      toast({
+          title: "Database Error",
+          description: "Could not fetch live data. Check Server.",
+          variant: "destructive"
       });
-  }, []);
-
+    });
+}, []);
   // Toggle Mood Selection
   const handleMoodToggle = (mood: string) => {
     if (selectedMoods.includes(mood)) {

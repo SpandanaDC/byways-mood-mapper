@@ -147,7 +147,27 @@ app.post('/api/login', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+// [EXAM REQ] PUT Operation - Updates User Location
+app.put('/api/users/:email', async (req, res) => {
+  const { email } = req.params;
+  const { locality } = req.body;
 
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { email: email },
+      { locality: locality }, 
+      { new: true } 
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "Locality updated successfully", user: updatedUser });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
