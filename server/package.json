@@ -2,7 +2,7 @@
   "name": "server",
   "version": "1.0.0",
   "main": "index.js",
-    "scripts": {
+ "scripts": {
     "dev": "concurrently \"npm run server\" \"vite\"",
     "server": "cd server && npm install && node index.js",
     "build": "vite build",
