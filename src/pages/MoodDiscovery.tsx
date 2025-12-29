@@ -17,7 +17,7 @@ const moods = [
   { value: "fun", label: "Fun" },
   { value: "nature", label: "Nature" },
   { value: "historical", label: "Historical" },
-  { value: "meditation", label: "Meditation" },
+  { value: "meditation", label: "Meditate" },
   { value: "instagramable", label: "Instagramable" },
   { value: "romantic", label: "Romantic" },
   { value: "lively", label: "Lively" },
