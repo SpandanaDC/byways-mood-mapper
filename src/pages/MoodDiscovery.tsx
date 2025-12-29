@@ -69,17 +69,40 @@ const MoodDiscovery = () => {
 
   const filterRecommendations = () => {
     let [minBudgetStr, maxBudgetStr] = budget.split('-');
-    if (budget === "2000+") { minBudgetStr = "2000"; maxBudgetStr = "100000"; }
-    const userMin = parseInt(minBudgetStr); const userMax = parseInt(maxBudgetStr);
+    
+    // Handle the "2000+" case
+    if (budget === "2000+") { 
+      minBudgetStr = "2000"; 
+      maxBudgetStr = "100000"; 
+    }
+    
+    // We only care about the UPPER LIMIT of the user's selection
+    const userMax = parseInt(maxBudgetStr);
 
     return places.filter(place => {
       let pMin = 0, pMax = 0;
-      if (place.price === "2000+") { pMin = 2000; pMax = 100000; } 
-      else { const parts = place.price.split('-'); pMin = parseInt(parts[0]); pMax = parseInt(parts[1] || parts[0]); }
       
-      const budgetMatch = (pMin <= userMax) && (userMin <= pMax);
+      // Parse the place price
+      if (place.price === "2000+") { 
+        pMin = 2000; 
+        pMax = 100000; 
+      } else { 
+        const parts = place.price.split('-'); 
+        pMin = parseInt(parts[0]); 
+        pMax = parseInt(parts[1] || parts[0]); 
+      }
+      
+      // LOGIC FIX:
+      // Treat the selection as a "Max Budget".
+      // If user picks "300-600", userMax is 600.
+      // "0-300" (max 300) -> Shown (300 <= 600)
+      // "300-600" (max 600) -> Shown (600 <= 600)
+      // "600-1000" (max 1000) -> Hidden (1000 > 600)
+      const budgetMatch = pMax <= userMax;
+
       const moodMatch = selectedMoods.some(m => place.tags.map(t => t.toLowerCase()).includes(m.toLowerCase()));
       const groupMatch = place.groupSize.includes(groupSize) || (groupSize === '7+' && place.groupSize.some(s => ['7+', '5', '6'].includes(s)));
+      
       return moodMatch && groupMatch && budgetMatch;
     });
   };
