@@ -22,7 +22,7 @@ const moods = [
   { value: "romantic", label: "Romantic" },
   { value: "lively", label: "Lively" },
   { value: "pet-friendly", label: "Pet-Friendly" },
-  { value: "classy", label: "Classy" },
+  { value: "classy", label: "Classic" },
   { value: "books", label: "Bookworm" },
 ];
 
