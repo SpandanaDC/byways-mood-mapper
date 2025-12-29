@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
     "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"npm run server\" \"vite\"",
+    "server": "cd server && npm install && node index.js",
     "build": "vite build",
+    "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "server": "cd server && node index.js",
-    "start:all": "concurrently \"npm run server\" \"npm run dev\""
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
