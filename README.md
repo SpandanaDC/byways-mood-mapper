@@ -1,19 +1,33 @@
-BYWAYS(Travel & Lifestyle)
+# BYWAYS — Personalized Travel Itinerary
 
-●A web application that suggests a personalized one-day travel itinerary based on the user's mood, budget, and preferred locations.
+A web application that suggests personalized one-day travel itineraries based on user mood, budget, and preferred locations.
 
-Project info:
+## 🚀 Live Demo (optional)
+Link: https://your-demo-link.vercel.app
 
-What technologies are used for this project?
+## 🧠 Tech Stack
+- React (with Vite)
+- TypeScript
+- Tailwind CSS & shadcn-ui
+- Backend: MongoDB hosted on AWS EC2
+- CI/CD: Docker + Jenkins
 
-This project is built with:
+## 📌 Features
+- Personalized itinerary suggestions
+- Responsive UI
+- Deployment with Docker & Jenkins
 
-Vite
+## 🛠 How I Built It
+1. Frontend with React + Tailwind
+2. Backend API connected to MongoDB
+3. AWS EC2 hosting
+4. CI/CD pipeline using Jenkins
+5. Dockerized containers
 
-TypeScript
+## 🧑‍💻 My Contributions
+- Designed full frontend UI and UX
+- Implemented backend logic and deployment
+- Managed CI/CD pipelines
+- Database integration and API routing
 
-React
-
-shadcn-ui
-
-Tailwind CSS
+## 🧪 Setup Instructions
